@@ -30,11 +30,15 @@ void computeTileActual(int rasterX, int rasterY, int tileX, int tileY, int tileX
 
 CPLErr invertColors(AlgoData data){
     CPLErr error;
+    int i, size = data.tileXa*data.tileYa;
     error = data.inputBand->RasterIO( GF_Read, data.tileXo, data.tileYo, data.tileXa, data.tileYa,
                     data.buffer, data.tileXa, data.tileYa, GDT_Float32,
                     0, 0 );
     if(error){
         return error;
+    }
+    for(i=0; i<size; i++){
+        data.buffer[i] = data.max - data.buffer[i];
     }
 
     error = data.outputBand->RasterIO( GF_Write, data.tileXo, data.tileYo, data.tileXa, data.tileYa,
