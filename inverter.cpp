@@ -1,24 +1,10 @@
 #include <iostream>
 #include <time.h>
+#include "ThreadController.hpp"
+#include "AlgoData.hpp"
 #include "cpl_string.h"
 #include "gdal_priv.h"
 #include "cpl_conv.h" // for CPLMalloc()
-
-struct AlgoData{
-    //GDALDataset *outputDataset;
-    //GDALDataset *inputDataset;
-    GDALRasterBand *outputBand;
-    GDALRasterBand *inputBand;
-    float min;
-    float max;
-    int tileXo;
-    int tileYo;
-    int tileXa;
-    int tileYa;
-    int rasterX;
-    int rasterY;
-    float *buffer;
-};
 
 void computeTileActual(int rasterX, int rasterY, int tileX, int tileY, int tileXo, int tileYo, int *tileXa, int *tileYa){
     *tileXa = rasterX - tileXo;
@@ -50,8 +36,6 @@ CPLErr invertColors(AlgoData data){
 int main(){
     std::cout<<"Color inversion"<<std::endl;
     char filename[30] = "malbolgeEtalon_coh.tif";
-    int tileX = 1000;
-    int tileY = 1000;
     CPLErr error;
     AlgoData algoData;
     double adfGeoTransform[6];
@@ -59,6 +43,8 @@ int main(){
 
     algoData.min = 0.0;
     algoData.max=0.99;
+    algoData.tileX = 1000;
+    algoData.tileY = 1000;
     GDALAllRegister();
 
     const char *pszFormat = "GTiff";
@@ -103,11 +89,11 @@ int main(){
     outputDataset->SetGeoTransform( adfGeoTransform );
     outputDataset->SetProjection(inputDataset->GetProjectionRef());
     algoData.outputBand = outputDataset->GetRasterBand(1);
-    algoData.buffer = (float *) CPLMalloc(sizeof(float)*tileX*tileY);
+    algoData.buffer = (float *) CPLMalloc(sizeof(float)*algoData.tileX*algoData.tileY);
 
-    for(algoData.tileXo= 0; algoData.tileXo <algoData.rasterX; algoData.tileXo+= tileX){
-        for(algoData.tileYo = 0; algoData.tileYo < algoData.rasterY; algoData.tileYo+= tileY){
-            computeTileActual(algoData.rasterX, algoData.rasterY, tileX, tileY, algoData.tileXo, algoData.tileYo, &algoData.tileXa, &algoData.tileYa);
+    /*for(algoData.tileXo= 0; algoData.tileXo <algoData.rasterX; algoData.tileXo+= algoData.tileX){
+        for(algoData.tileYo = 0; algoData.tileYo < algoData.rasterY; algoData.tileYo+= algoData.tileY){
+            computeTileActual(algoData.rasterX, algoData.rasterY, algoData.tileX, algoData.tileY, algoData.tileXo, algoData.tileYo, &algoData.tileXa, &algoData.tileYa);
             std::cout<<algoData.tileXo << ")" << algoData.tileXa << " "<<algoData.tileYo << ")" << algoData.tileYa<<std::endl;
             error = invertColors(algoData);
             if(error){
@@ -115,7 +101,9 @@ int main(){
                 return 500;
         	}
         }
-    }
+    }*/
+    ThreadController controller(algoData);
+    controller.startThreads();
 
 
     CPLFree(algoData.buffer);

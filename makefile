@@ -10,7 +10,9 @@ maker: maker.cpp
 
 inverter: inverter.cpp
 	g++ -c inverter.cpp
-	g++ -o inverter inverter.o -lgdal
+	g++ -c ThreadController.cpp
+	g++ -c ThreadHolder.cpp
+	g++ -o inverter inverter.o ThreadController.o ThreadHolder.o -std=c++11 -lgdal -Os -pthread
 
 clean:
 	rm -f main.o
@@ -19,3 +21,5 @@ clean:
 	rm -f maker
 	rm -f inverter.o
 	rm -f inverter
+	rm -f ThreadController.o
+	rm -f ThreadHolder.o
