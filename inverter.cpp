@@ -104,6 +104,18 @@ int main(){
     }*/
     ThreadController controller(algoData);
     controller.startThreads();
+    std::vector<AlgoData> *erroredConfs =controller.getErroredConfs();
+    while(!erroredConfs->empty()){
+        error = invertColors(erroredConfs->back());
+        erroredConfs->pop_back();
+        if(error){
+            std::cerr<<"Got gdal error for the second time: "<< error << ". Terminating now!"<<std::endl;
+            CPLFree(algoData.buffer);
+            GDALClose((GDALDatasetH)outputDataset);
+            GDALClose(inputDataset);
+            return 500;
+        }
+    }
 
 
     CPLFree(algoData.buffer);

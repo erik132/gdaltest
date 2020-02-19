@@ -14,13 +14,15 @@ void ThreadHolder::work(){
 
     CPLErr error = this->invertColors(this->algoData);
 
-    this->controller->getOutMutex()->lock();
+
     if(error){
-        std::cout<<"There was error" << error << ", but we do not care. Party continues! " << std::endl;
+      this->controller->getOutMutex()->lock();
+        std::cerr<<"There was error" << error << ". This incident will be retried. " << std::endl;
+        std::cerr<< algoData.tileXo << ":" <<algoData.tileYo <<std::endl;
+        this->controller->getOutMutex()->unlock();
     }
-    std::cout<< algoData.tileXo << ":" <<algoData.tileYo <<std::endl;
-    this->controller->getOutMutex()->unlock();
-    this->controller->registerThreadEnd();
+
+    this->controller->registerThreadEnd(error, this->algoData);
 }
 
 CPLErr ThreadHolder::invertColors(AlgoData data){

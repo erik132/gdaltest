@@ -16,12 +16,13 @@ private:
     std::mutex registerMutex;
     std::mutex outMutex;
     AlgoData algoData;
+    std::vector<AlgoData> erroredConfs;
 
     void computeTileActual(int rasterX, int rasterY, int tileX, int tileY, int tileXo, int tileYo, int *tileXa, int *tileYa);
 public:
     ThreadController(AlgoData data);
     void startThreads();
-    void registerThreadEnd();
+    void registerThreadEnd(CPLErr error, AlgoData data);
 
     std::condition_variable * getThreadSync(){
         return &threadSync;
@@ -29,6 +30,9 @@ public:
 
     std::mutex *getOutMutex(){
         return &outMutex;
+    }
+    std::vector<AlgoData> *getErroredConfs(){
+        return &this->erroredConfs;
     }
 };
 

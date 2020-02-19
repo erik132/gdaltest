@@ -35,10 +35,13 @@ void ThreadController::computeTileActual(int rasterX, int rasterY, int tileX, in
     *tileYa = (*tileYa > tileY)*tileY + !(*tileYa > tileY)* *tileYa;
 }
 
-void ThreadController::registerThreadEnd(){
+void ThreadController::registerThreadEnd(CPLErr error, AlgoData data){
     this->registerMutex.lock();
 
     this->finishedCount++;
+    if(error){
+        this->erroredConfs.push_back(data);
+    }
     if(this->finishedCount == this->workerCount){
         this->endBlock.notify_all();
     }else{
